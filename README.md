@@ -8,13 +8,16 @@ Role to deploy the [Coraza WAF (OWASP)](https://coraza.io/) [HAProxy SPOA-integr
 
 We focus on the HAProxy community-edition as the enterprise-edition already has a built-in WAF!
 
-[![Molecule Test Status](https://badges.ansibleguy.net/haproxy_waf_coraza.molecule.svg)](https://github.com/ansibleguy/_meta_cicd/blob/latest/templates/usr/local/bin/cicd/molecule.sh.j2)
-[![YamlLint Test Status](https://badges.ansibleguy.net/haproxy_waf_coraza.yamllint.svg)](https://github.com/ansibleguy/_meta_cicd/blob/latest/templates/usr/local/bin/cicd/yamllint.sh.j2)
-[![PyLint Test Status](https://badges.ansibleguy.net/haproxy_waf_coraza.pylint.svg)](https://github.com/ansibleguy/_meta_cicd/blob/latest/templates/usr/local/bin/cicd/pylint.sh.j2)
-[![Ansible-Lint Test Status](https://badges.ansibleguy.net/haproxy_waf_coraza.ansiblelint.svg)](https://github.com/ansibleguy/_meta_cicd/blob/latest/templates/usr/local/bin/cicd/ansiblelint.sh.j2)
+[![Lint](https://github.com/ansibleguy/haproxy_waf_coraza/actions/workflows/lint.yml/badge.svg)](https://github.com/ansibleguy/haproxy_waf_coraza/actions/workflows/lint.yml)
 [![Ansible Galaxy](https://badges.ansibleguy.net/galaxy.badge.svg)](https://galaxy.ansible.com/ui/standalone/roles/ansibleguy/haproxy_waf_coraza)
 
-Molecule Logs: [Short](https://badges.ansibleguy.net/log/molecule_haproxy_waf_coraza_test_short.log), [Full](https://badges.ansibleguy.net/log/molecule_haproxy_waf_coraza_test.log)
+**Molecule Integration-Tests**:
+
+* Status: [![Molecule Test Status](https://badges.ansibleguy.net/haproxy_waf_coraza.molecule.svg)](https://github.com/ansibleguy/_meta_cicd/blob/latest/templates/usr/local/bin/cicd/molecule.sh.j2) |
+[![Functional-Tests](https://github.com/ansibleguy/haproxy_waf_coraza/actions/workflows/integration_test_result.yml/badge.svg)](https://github.com/ansibleguy/haproxy_waf_coraza/actions/workflows/integration_test_result.yml)
+* Logs: [API](https://ci.ansibleguy.net/api/job/ansible-test-molecule-haproxy_waf_coraza/logs?token=2b7bba30-9a37-4b57-be8a-99e23016ce70&lines=1000) | [Short](https://badges.ansibleguy.net/log/molecule_haproxy_waf_coraza_test_short.log) | [Full](https://badges.ansibleguy.net/log/molecule_haproxy_waf_coraza_test.log)
+
+Internal CI: [Tester Role](https://github.com/ansibleguy/_meta_cicd) | [Jobs API](https://github.com/O-X-L/github-self-hosted-jobs-systemd)
 
 
 **Tested:**
