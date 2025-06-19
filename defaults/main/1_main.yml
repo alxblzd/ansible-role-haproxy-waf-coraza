@@ -104,7 +104,7 @@ defaults_waf:
   #   download the source-code from https://github.com/O-X-L/coraza-spoa and
   #   compile the binary yourself
   install_bin: true
-  release: '2025-01'  # github.com/O-X-L/coraza-spoa (branch 'oxl')
+  release: '2025-06'  # pre-built binary @ github.com/O-X-L/coraza-spoa (branch 'oxl')
   response_check: false
 
   port: 9000
