@@ -8,16 +8,16 @@ Role to deploy the [Coraza WAF (OWASP)](https://coraza.io/) [HAProxy SPOA-integr
 
 We focus on the HAProxy community-edition as the enterprise-edition already has a built-in WAF!
 
-[![Lint](https://github.com/ansibleguy/haproxy_waf_coraza/actions/workflows/lint.yml/badge.svg)](https://github.com/ansibleguy/haproxy_waf_coraza/actions/workflows/lint.yml)
-[![Ansible Galaxy](https://badges.ansibleguy.net/galaxy.badge.svg)](https://galaxy.ansible.com/ui/standalone/roles/ansibleguy/haproxy_waf_coraza)
+[![Lint](https://github.com/O-X-L/ansible-role-haproxy-waf-coraza/actions/workflows/lint.yml/badge.svg)](https://github.com/O-X-L/ansible-role-haproxy-waf-coraza/actions/workflows/lint.yml)
+[![Ansible Galaxy](https://badges.oss.oxl.app/galaxy.badge.svg)](https://galaxy.ansible.com/ui/standalone/roles/oxlorg/haproxy_waf_coraza)
 
 **Molecule Integration-Tests**:
 
-* Status: [![Molecule Test Status](https://badges.ansibleguy.net/haproxy_waf_coraza.molecule.svg)](https://github.com/ansibleguy/_meta_cicd/blob/latest/templates/usr/local/bin/cicd/molecule.sh.j2) |
-[![Functional-Tests](https://github.com/ansibleguy/haproxy_waf_coraza/actions/workflows/integration_test_result.yml/badge.svg)](https://github.com/ansibleguy/haproxy_waf_coraza/actions/workflows/integration_test_result.yml)
-* Logs: [API](https://ci.ansibleguy.net/api/job/ansible-test-molecule-haproxy_waf_coraza/logs?token=2b7bba30-9a37-4b57-be8a-99e23016ce70&lines=1000) | [Short](https://badges.ansibleguy.net/log/molecule_haproxy_waf_coraza_test_short.log) | [Full](https://badges.ansibleguy.net/log/molecule_haproxy_waf_coraza_test.log)
+* Status: [![Molecule Test Status](https://badges.oss.oxl.app/haproxy_waf_coraza.molecule.svg)](https://github.com/O-X-L/ansible-role-oxl-cicd/blob/latest/templates/usr/local/bin/cicd/molecule.sh.j2) |
+[![Functional-Tests](https://github.com/O-X-L/ansible-role-haproxy-waf-coraza/actions/workflows/integration_test_result.yml/badge.svg)](https://github.com/O-X-L/ansible-role-haproxy-waf-coraza/actions/workflows/integration_test_result.yml)
+* Logs: [API](https://ci.oss.oxl.app/api/job/ansible-test-molecule-haproxy_waf_coraza/logs?token=2b7bba30-9a37-4b57-be8a-99e23016ce70&lines=1000) | [Short](https://badges.oss.oxl.app/log/molecule_haproxy_waf_coraza_test_short.log) | [Full](https://badges.oss.oxl.app/log/molecule_haproxy_waf_coraza_test.log)
 
-Internal CI: [Tester Role](https://github.com/ansibleguy/_meta_cicd) | [Jobs API](https://github.com/O-X-L/github-self-hosted-jobs-systemd)
+Internal CI: [Tester Role](https://github.com/O-X-L/ansible-role-oxl-cicd) | [Jobs API](https://github.com/O-X-L/github-self-hosted-jobs-systemd)
 
 
 **Tested:**
@@ -29,13 +29,13 @@ Internal CI: [Tester Role](https://github.com/ansibleguy/_meta_cicd) | [Jobs API
 
 ```bash
 # latest
-ansible-galaxy role install git+https://github.com/ansibleguy/haproxy_waf_coraza
+ansible-galaxy role install git+https://github.com/O-X-L/ansible-role-haproxy-waf-coraza
 
 # from galaxy
-ansible-galaxy install ansibleguy.haproxy_waf_coraza
+ansible-galaxy install oxlorg.haproxy_waf_coraza
 
 # or to custom role-path
-ansible-galaxy install ansibleguy.haproxy_waf_coraza --roles-path ./roles
+ansible-galaxy install oxlorg.haproxy_waf_coraza --roles-path ./roles
 ```
 
 ----
@@ -46,7 +46,7 @@ ansible-galaxy install ansibleguy.haproxy_waf_coraza --roles-path ./roles
 
 Here you can find a detailed config example and its results:
 
-* [Example](https://github.com/ansibleguy/haproxy_waf_coraza/blob/latest/Example.md)
+* [Example](https://github.com/O-X-L/ansible-role-haproxy-waf-coraza/blob/latest/Example.md)
 
 ### Config
 
@@ -97,10 +97,10 @@ waf:
 
 Then you will need to include the SPOE-backend: `/etc/haproxy/waf-coraza.cfg`
 
-And target the SPOE-agents in your HAProxy config: (or use the role [ansibleguy/infra_haproxy](https://github.com/ansibleguy/infra_haproxy) with `haproxy.waf.coraza.enable=true`)
+And target the SPOE-agents in your HAProxy config: (or use the role [O-X-L/ansible-role-haproxy](https://github.com/O-X-L/ansible-role-haproxy) with `haproxy.waf.coraza.enable=true`)
 
 ```
-http-request set-var(txn.waf_app) str(app1) if { req.hdr(host) -i -m str ansibleguy.net test.ansibleguy.net }
+http-request set-var(txn.waf_app) str(app1) if { req.hdr(host) -i -m str oxl.at test.oxl.at }
 
 # fallback app
 http-request set-var(txn.waf_app) str(default) if !{ var(txn.waf_app) -m found }
@@ -241,13 +241,13 @@ cat /etc/coraza-spoa/spoa.yml
 
 * **Note:** Most of the role's functionality can be opted in or out.
 
-  For all available options - see the default-config located in [the main defaults-file](https://github.com/ansibleguy/haproxy_waf_coraza/blob/latest/defaults/main/1_main.yml)!
+  For all available options - see the default-config located in [the main defaults-file](https://github.com/O-X-L/ansible-role-haproxy-waf-coraza/blob/latest/defaults/main/1_main.yml)!
 
 
 * **Warning:** Not every setting/variable you provide will be checked for validity. Bad config might break the role!
 
 
-* **Info:** You need to configure the WAF-Applications yourself if HAProxy is not managed by the [ansibleguy/infra_haproxy](https://github.com/ansibleguy/infra_haproxy) Ansible-role (after setting `haproxy.waf.coraza.enable=true`)!
+* **Info:** You need to configure the WAF-Applications yourself if HAProxy is not managed by the [O-X-L/ansible-role-haproxy](https://github.com/O-X-L/ansible-role-haproxy) Ansible-role (after setting `haproxy.waf.coraza.enable=true`)!
 
 
 ----

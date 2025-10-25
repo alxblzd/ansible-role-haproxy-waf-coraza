@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # {{ ansible_managed }}
-# ansibleguy.haproxy_waf_coraza
+# oxlorg.haproxy_waf_coraza
 
 # Copyright: Rath Pascal Rene
 # License: MIT

@@ -1,16 +1,17 @@
 ---
 
 galaxy_info:
-  author: 'AnsibleGuy <guy@ansibleguy.net>'
-  namespace: 'ansibleguy'
+  author: 'Rath Pascal <contact@oxl.at>'
+  namespace: 'oxlorg'
   license: 'MIT'
-  issue_tracker_url: 'https://github.com/ansibleguy/haproxy_waf_coraza/issues'
+  issue_tracker_url: 'https://github.com/O-X-L/ansible-role-haproxy-waf-coraza/issues'
   min_ansible_version: '2.14'
   description: 'Provision the Coraza-WAF integrated with HAProxy'
   platforms:
     - name: Debian
       versions:
         - bookworm
+        - trixies
   galaxy_tags:
     - 'waf'
     - 'haproxy'
