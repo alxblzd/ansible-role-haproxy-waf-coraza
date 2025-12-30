@@ -17,7 +17,7 @@ defaults_app:
   transaction_ttl_sec: 60
 
   # see: https://github.com/corazawaf/coraza-coreruleset/releases
-  ruleset_version: 'v4.7.0'
+  ruleset_version: 'v4.21.0'
 
   rules:
     # see: https://github.com/corazawaf/coraza-coreruleset/blob/main/rules/%40coraza.conf-recommended
