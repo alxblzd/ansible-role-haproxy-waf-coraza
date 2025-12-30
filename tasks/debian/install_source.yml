@@ -99,7 +99,7 @@
 
     - name: HAProxy WAF | Pick built binary path
       ansible.builtin.set_fact:
-        coraza_spoa_built_bin: "{{ (coraza_spoa_built_bin_stats.results | selectattr('stat.exists', 'bool') | map(attribute='item') | list | first) | default('') }}"
+        coraza_spoa_built_bin: "{{ (coraza_spoa_built_bin_stats.results | selectattr('stat.exists', 'equalto', true) | map(attribute='item') | list | first) | default('') }}"
 
     - name: HAProxy WAF | Fail if no built binary found
       ansible.builtin.fail:

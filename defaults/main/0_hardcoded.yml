@@ -19,8 +19,7 @@ WAF_HC:
   app_var: 'txn.waf_app'
 
   url:
-    service: 'https://raw.githubusercontent.com/O-X-L/coraza-spoa/refs/heads/oxl/contrib/coraza-spoa.service'
-    # src: 'https://github.com/O-X-L/coraza-spoa/archive/refs/heads/oxl.zip'
-    bin: "https://github.com/O-X-L/coraza-spoa/releases/download/{{ WAF_CONFIG.release }}/coraza-spoa-linux-{{ arch }}.tar.gz"
+    service: 'https://raw.githubusercontent.com/corazawaf/coraza-spoa/main/contrib/coraza-spoa.service'
+    bin: "https://github.com/corazawaf/coraza-spoa/releases/download/{{ coraza_spoa_version | default(WAF_CONFIG.release) }}/coraza-spoa-linux-{{ arch }}.tar.gz"
     crs_1: 'https://github.com/corazawaf/coraza-coreruleset/archive/refs/tags/'
     crs_2: '.tar.gz'

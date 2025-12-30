@@ -7,13 +7,16 @@
 
 - name: HAProxy WAF | Resolve Coraza SPOA install method
   ansible.builtin.set_fact:
-    coraza_spoa_install_method_resolved: >-
-      {% set arch_val = (ansible_architecture | lower) %}
-      {% if coraza_spoa_install_method == 'auto' %}
-      {%   if arch_val in ['x86_64', 'amd64'] %}binary{% elif arch_val in ['aarch64', 'arm64'] %}source{% else %}binary{% endif %}
-      {% else %}{{ coraza_spoa_install_method }}
-      {% endif %}
+    coraza_spoa_install_method_resolved: "{{ 'binary' if coraza_spoa_install_method == 'auto' and (ansible_architecture | lower) in ['x86_64', 'amd64'] else ('source' if coraza_spoa_install_method == 'auto' else coraza_spoa_install_method) }}"
     coraza_spoa_version_resolved: "{{ coraza_spoa_version | default(WAF_CONFIG.release) }}"
+
+- name: HAProxy WAF | Debug install decision
+  ansible.builtin.debug:
+    msg:
+      architecture: "{{ ansible_architecture | lower }}"
+      coraza_spoa_install_method_resolved: "{{ coraza_spoa_install_method_resolved }}"
+      install_bin: "{{ WAF_CONFIG.install_bin | bool }}"
+      waf_bin_exists: "{{ waf_bin.stat.exists | default(false) }}"
 
 - name: HAProxy WAF | Fail if binary install is requested on unsupported architecture
   ansible.builtin.fail:
