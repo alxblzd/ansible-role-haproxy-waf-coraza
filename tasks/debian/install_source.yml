@@ -45,6 +45,10 @@
         state: directory
         mode: 0750
 
+    - name: HAProxy WAF | Prepare Go PATH
+      ansible.builtin.set_fact:
+        coraza_spoa_go_search_path: "{{ ([ansible_env.PATH | default('')] | reject('equalto', '') | list + ['/usr/local/go/bin', '/usr/local/bin', '/usr/bin', '/bin', '/snap/bin', '/usr/sbin', '/sbin']) | join(':') }}"
+
     - name: HAProxy WAF | Checkout Coraza SPOA source
       ansible.builtin.git:
         repo: "{{ coraza_spoa_repo }}"
@@ -76,26 +80,67 @@
           {% else %}.{% endif %}
 
     - name: HAProxy WAF | Detect Go toolchain in PATH
-      ansible.builtin.command: "which go"
+      ansible.builtin.shell: "command -v go"
+      args:
+        executable: /bin/bash
+      environment:
+        PATH: "{{ coraza_spoa_go_search_path }}"
       register: coraza_spoa_go_detect
       changed_when: false
       failed_when: false
 
+    - name: HAProxy WAF | Gather Go binary candidates
+      ansible.builtin.set_fact:
+        coraza_spoa_go_candidates: "{{ [coraza_spoa_go_detect.stdout | default('') | trim, '/usr/local/go/bin/go', '/usr/local/bin/go', '/usr/bin/go', '/snap/bin/go', '/bin/go'] | map('trim') | reject('equalto', '') | list | unique }}"
+
+    - name: HAProxy WAF | Check Go binary candidates
+      ansible.builtin.stat:
+        path: "{{ item }}"
+      register: coraza_spoa_go_candidate_stats
+      loop: "{{ coraza_spoa_go_candidates }}"
+
+    - name: HAProxy WAF | Set Go binary fact
+      ansible.builtin.set_fact:
+        coraza_go_bin: "{{ (coraza_spoa_go_candidate_stats.results | selectattr('stat.exists', 'equalto', true) | map(attribute='item') | list | first) | default('') }}"
+
     - name: HAProxy WAF | Fail when Go toolchain is missing
       ansible.builtin.fail:
-        msg: "Go toolchain not found in PATH. Install Go (e.g. via your golang role) or set coraza_spoa_install_method=binary."
-      when: coraza_spoa_go_detect.rc != 0
+        msg: |
+          Go toolchain not found. Checked PATH "{{ coraza_spoa_go_search_path }}" and candidates: {{ coraza_spoa_go_candidates | join(', ') }}.
+          Install Go (e.g. via your golang role) or set coraza_spoa_install_method=binary.
+      when: coraza_go_bin == ''
+
+    - name: HAProxy WAF | Go version
+      ansible.builtin.command: "{{ coraza_go_bin }} version"
+      environment:
+        PATH: "{{ coraza_spoa_go_search_path }}"
+      register: coraza_spoa_go_version
+      changed_when: false
+
+    - name: HAProxy WAF | Go debug info
+      ansible.builtin.debug:
+        msg:
+          go_bin: "{{ coraza_go_bin }}"
+          go_version: "{{ coraza_spoa_go_version.stdout | default('') }}"
+          effective_path: "{{ coraza_spoa_go_search_path }}"
+          ansible_become: "{{ ansible_become | default(false) }}"
+          coraza_spoa_install_method_resolved: "{{ coraza_spoa_install_method_resolved }}"
+      when: coraza_waf_debug | bool
 
     - name: HAProxy WAF | Build Coraza SPOA (make)
       ansible.builtin.command: make build
       args:
         chdir: "{{ coraza_spoa_build_dir }}"
+      environment:
+        PATH: "{{ coraza_spoa_go_search_path }}"
       when: coraza_spoa_makefile.stat.exists
 
     - name: HAProxy WAF | Build Coraza SPOA (go build)
-      ansible.builtin.command: "go build -o coraza-spoa {{ coraza_spoa_go_target }}"
+      ansible.builtin.command: "{{ coraza_go_bin }} build -o coraza-spoa {{ coraza_spoa_go_target }}"
       args:
         chdir: "{{ coraza_spoa_build_dir }}"
+      environment:
+        PATH: "{{ coraza_spoa_go_search_path }}"
       when: not coraza_spoa_makefile.stat.exists
 
     - name: HAProxy WAF | Locate built binary

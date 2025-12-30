@@ -2,6 +2,7 @@
 
 force_update: false
 only_app: ''
+coraza_waf_debug: false
 
 coraza_spoa_install_method: 'auto'  # auto|source|binary
 # Default to upstream main for source builds; override to a tag/branch/release as needed.
