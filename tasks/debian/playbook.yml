@@ -1,0 +1,49 @@
+---
+- name: Setup Haproxy 
+  hosts: all
+  become: yes
+  pre_tasks:
+    - name: Clone the base Haproxy role repository
+      git:
+        repo: 'git@git.webguardx.com:alex/ansible-role-haproxy.git'
+        dest: "{{ playbook_dir }}/roles/ansible-role-haproxy"
+        version: master
+        update: yes  # Ensures we don't overwrite if the role already exists
+        force: yes
+      delegate_to: localhost  # This will execute the task on the local machine
+      become: no  # Disable sudo for this task
+
+    - name: Clone or update the golang role repository
+      git:
+        repo: "git@github.com:alxblzd/ansible-role-golang.git"
+        dest: "{{ playbook_dir }}/roles/ansible-role-golang"
+        version: "changes1"   # tag, branch, or commit SHA (pin it, do NOT use latest)
+        update: yes
+        force: yes
+      delegate_to: localhost
+      become: no
+
+    - name: Clone the Haproxy WAF Coraza role repository
+      git:
+        repo: 'git@github.com:alxblzd/ansible-role-haproxy-waf-coraza.git'
+        dest: "{{ playbook_dir }}/roles/ansible-role-haproxy-waf-coraza"
+        version: latest
+        update: no  # Ensures we don't overwrite if the role already exists
+        force: no
+      delegate_to: localhost  # This will execute the task on the local machine
+      become: no  # Disable sudo for this task
+
+  tasks:
+
+    - name: Run the base Haproxy role
+      ansible.builtin.include_role:
+        name: ansible-role-haproxy
+
+    - name: Run the base golang role
+      ansible.builtin.include_role:
+        name: ansible-role-golang
+
+    - name: Run the Haproxy WAF Coraza role
+      ansible.builtin.include_role:
+        name: ansible-role-haproxy-waf-coraza
+      tags: ['coraza']
