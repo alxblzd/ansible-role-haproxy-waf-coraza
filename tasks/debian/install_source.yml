@@ -75,6 +75,17 @@
           {% elif coraza_spoa_cmd_spoa_dir.stat.exists %}./cmd/spoa
           {% else %}.{% endif %}
 
+    - name: HAProxy WAF | Detect Go toolchain in PATH
+      ansible.builtin.command: "which go"
+      register: coraza_spoa_go_detect
+      changed_when: false
+      failed_when: false
+
+    - name: HAProxy WAF | Fail when Go toolchain is missing
+      ansible.builtin.fail:
+        msg: "Go toolchain not found in PATH. Install Go (e.g. via your golang role) or set coraza_spoa_install_method=binary."
+      when: coraza_spoa_go_detect.rc != 0
+
     - name: HAProxy WAF | Build Coraza SPOA (make)
       ansible.builtin.command: make build
       args:

@@ -28,9 +28,8 @@
 - name: HAProxy WAF | Fail if Binary is missing
   ansible.builtin.fail:
     msg: |
-      The WAF binary '{{  WAF_HC.path.file.bin }}' does not exist!
-      Either enable the 'waf.install_bin' setting..
-      or download the source-code from https://github.com/O-X-L/coraza-spoa and compile it yourself!
+      The WAF binary '{{ WAF_HC.path.file.bin }}' does not exist.
+      Enable 'waf.install_bin' or set 'coraza_spoa_install_method=source' to build from upstream.
   when:
     - not WAF_CONFIG.install_bin | bool
     - not waf_bin.stat.exists

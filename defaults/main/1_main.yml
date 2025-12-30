@@ -4,7 +4,7 @@ force_update: false
 only_app: ''
 
 coraza_spoa_install_method: 'auto'  # auto|source|binary
-# Default to upstream main for source builds; override to a tag/branch as needed.
+# Default to upstream main for source builds; override to a tag/branch/release as needed.
 coraza_spoa_version: 'main'
 coraza_spoa_repo: 'https://github.com/corazawaf/coraza-spoa.git'
 coraza_spoa_force_rebuild: false
@@ -105,12 +105,9 @@ defaults_app:
     #          ...
 
 defaults_waf:
-  # to download pre-compiled binary from 'github.com/O-X-L/coraza-spoa'
-  #   else you have to manually install golang,
-  #   download the source-code from https://github.com/O-X-L/coraza-spoa and
-  #   compile the binary yourself
   install_bin: true
-  release: '2025-06'  # pre-built binary @ github.com/O-X-L/coraza-spoa (branch 'oxl')
+  # Used for binary downloads; set to a GitHub release tag when using coraza_spoa_install_method=binary.
+  release: 'main'
   response_check: false
 
   port: 9000
