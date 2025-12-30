@@ -17,6 +17,14 @@
     - "{{ WAF_HC.path.cnf }}"
     - "{{ WAF_HC.path.cnf }}/{{ WAF_HC.path.dir.cnf_rules }}/_tmpl"
 
+- name: HAProxy WAF | Ensure HAProxy config directory exists
+  ansible.builtin.file:
+    path: '/etc/haproxy'
+    state: directory
+    owner: 'root'
+    group: 'root'
+    mode: 0755
+
 - name: HAProxy WAF | HAProxy Config
   ansible.builtin.template:
     src: "templates/etc/haproxy/{{ item.s }}.j2"
