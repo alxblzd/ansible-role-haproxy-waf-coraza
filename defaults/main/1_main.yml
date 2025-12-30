@@ -3,6 +3,11 @@
 force_update: false
 only_app: ''
 
+coraza_spoa_install_method: 'auto'  # auto|source|binary
+coraza_spoa_version: "{{ defaults_waf.release }}"
+coraza_spoa_repo: 'https://github.com/corazawaf/coraza-spoa.git'
+coraza_spoa_force_rebuild: false
+
 defaults_app:
   block: false  # SecRuleEngine
 

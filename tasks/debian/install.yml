@@ -5,6 +5,23 @@
     path: "{{ WAF_HC.path.file.bin }}"
   register: waf_bin
 
+- name: HAProxy WAF | Resolve Coraza SPOA install method
+  ansible.builtin.set_fact:
+    coraza_spoa_install_method_resolved: >-
+      {% set arch_val = (ansible_architecture | lower) %}
+      {% if coraza_spoa_install_method == 'auto' %}
+      {%   if arch_val in ['x86_64', 'amd64'] %}binary{% elif arch_val in ['aarch64', 'arm64'] %}source{% else %}binary{% endif %}
+      {% else %}{{ coraza_spoa_install_method }}
+      {% endif %}
+    coraza_spoa_version_resolved: "{{ coraza_spoa_version | default(WAF_CONFIG.release) }}"
+
+- name: HAProxy WAF | Fail if binary install is requested on unsupported architecture
+  ansible.builtin.fail:
+    msg: "Coraza SPOA binaries are not supported on ARM64. Set coraza_spoa_install_method=source or auto for this architecture."
+  when:
+    - coraza_spoa_install_method_resolved == 'binary'
+    - ansible_architecture | lower in ['aarch64', 'arm64']
+
 - name: HAProxy WAF | Fail if Binary is missing
   ansible.builtin.fail:
     msg: |
@@ -23,6 +40,7 @@
   when:
     - WAF_CONFIG.install_bin | bool
     - not waf_bin.stat.exists or force_update | bool
+    - coraza_spoa_install_method_resolved == 'binary'
 
 - name: "HAProxy WAF | Download Binary ({{ WAF_HC.url.bin }})"
   ansible.builtin.unarchive:
@@ -33,6 +51,7 @@
   when:
     - WAF_CONFIG.install_bin | bool
     - not waf_bin.stat.exists or force_update | bool
+    - coraza_spoa_install_method_resolved == 'binary'
 
 - name: HAProxy WAF | Move Binary
   ansible.builtin.copy:
@@ -45,6 +64,12 @@
   when:
     - WAF_CONFIG.install_bin | bool
     - not waf_bin.stat.exists or force_update | bool
+    - coraza_spoa_install_method_resolved == 'binary'
+
+- name: HAProxy WAF | Build Coraza SPOA from source
+  ansible.builtin.import_tasks: debian/install_source.yml
+  when:
+    - coraza_spoa_install_method_resolved == 'source'
 
 - name: HAProxy WAF | Create service-override directory
   ansible.builtin.file:

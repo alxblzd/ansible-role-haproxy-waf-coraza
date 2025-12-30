@@ -1,0 +1,124 @@
+---
+
+- name: HAProxy WAF | Set source build paths
+  ansible.builtin.set_fact:
+    coraza_spoa_build_root: '/tmp/coraza'
+    coraza_spoa_build_dir: '/tmp/coraza/coraza-spoa'
+    coraza_spoa_marker_file: "{{ WAF_HC.path.cnf }}/.coraza-spoa-version"
+    coraza_spoa_installed_version: ''
+
+- name: HAProxy WAF | Check installed source build marker
+  ansible.builtin.stat:
+    path: "{{ coraza_spoa_marker_file }}"
+  register: coraza_spoa_marker_stat
+
+- name: HAProxy WAF | Read installed source build marker
+  ansible.builtin.slurp:
+    path: "{{ coraza_spoa_marker_file }}"
+  register: coraza_spoa_marker_content
+  when: coraza_spoa_marker_stat.stat.exists
+
+- name: HAProxy WAF | Current installed source version
+  ansible.builtin.set_fact:
+    coraza_spoa_installed_version: "{{ coraza_spoa_marker_content.content | b64decode | trim }}"
+  when: coraza_spoa_marker_stat.stat.exists
+
+- name: HAProxy WAF | Evaluate if source rebuild is required
+  ansible.builtin.set_fact:
+    coraza_spoa_rebuild_required: "{{ coraza_spoa_force_rebuild | bool or force_update | bool or (not waf_bin.stat.exists) or (coraza_spoa_installed_version != coraza_spoa_version_resolved) }}"
+
+- name: HAProxy WAF | Build Coraza SPOA from source
+  when: coraza_spoa_rebuild_required | bool
+  block:
+    - name: HAProxy WAF | Install build dependencies (Debian)
+      ansible.builtin.apt:
+        name:
+          - git
+          - make
+          - golang-go
+        state: present
+        update_cache: yes
+      when: ansible_os_family == 'Debian'
+
+    - name: HAProxy WAF | Ensure build directory exists
+      ansible.builtin.file:
+        path: "{{ coraza_spoa_build_root }}"
+        state: directory
+        mode: 0750
+
+    - name: HAProxy WAF | Checkout Coraza SPOA source
+      ansible.builtin.git:
+        repo: "{{ coraza_spoa_repo }}"
+        dest: "{{ coraza_spoa_build_dir }}"
+        version: "{{ coraza_spoa_version_resolved }}"
+        force: "{{ coraza_spoa_force_rebuild | bool }}"
+        update: yes
+
+    - name: HAProxy WAF | Detect Makefile
+      ansible.builtin.stat:
+        path: "{{ coraza_spoa_build_dir }}/Makefile"
+      register: coraza_spoa_makefile
+
+    - name: HAProxy WAF | Detect Go command path
+      ansible.builtin.stat:
+        path: "{{ coraza_spoa_build_dir }}/cmd/coraza-spoa"
+      register: coraza_spoa_cmd_dir
+
+    - name: HAProxy WAF | Detect alternate Go command path
+      ansible.builtin.stat:
+        path: "{{ coraza_spoa_build_dir }}/cmd/spoa"
+      register: coraza_spoa_cmd_spoa_dir
+
+    - name: HAProxy WAF | Select Go build target
+      ansible.builtin.set_fact:
+        coraza_spoa_go_target: >-
+          {% if coraza_spoa_cmd_dir.stat.exists %}./cmd/coraza-spoa
+          {% elif coraza_spoa_cmd_spoa_dir.stat.exists %}./cmd/spoa
+          {% else %}.{% endif %}
+
+    - name: HAProxy WAF | Build Coraza SPOA (make)
+      ansible.builtin.command: make build
+      args:
+        chdir: "{{ coraza_spoa_build_dir }}"
+      when: coraza_spoa_makefile.stat.exists
+
+    - name: HAProxy WAF | Build Coraza SPOA (go build)
+      ansible.builtin.command: "go build -o coraza-spoa {{ coraza_spoa_go_target }}"
+      args:
+        chdir: "{{ coraza_spoa_build_dir }}"
+      when: not coraza_spoa_makefile.stat.exists
+
+    - name: HAProxy WAF | Locate built binary
+      ansible.builtin.stat:
+        path: "{{ item }}"
+      register: coraza_spoa_built_bin_stats
+      loop:
+        - "{{ coraza_spoa_build_dir }}/coraza-spoa"
+        - "{{ coraza_spoa_build_dir }}/bin/coraza-spoa"
+        - "{{ coraza_spoa_build_dir }}/dist/coraza-spoa"
+
+    - name: HAProxy WAF | Pick built binary path
+      ansible.builtin.set_fact:
+        coraza_spoa_built_bin: "{{ (coraza_spoa_built_bin_stats.results | selectattr('stat.exists', 'bool') | map(attribute='item') | list | first) | default('') }}"
+
+    - name: HAProxy WAF | Fail if no built binary found
+      ansible.builtin.fail:
+        msg: "Coraza SPOA build did not produce a binary in expected locations."
+      when: coraza_spoa_built_bin == ''
+
+    - name: HAProxy WAF | Install Coraza SPOA binary from source
+      ansible.builtin.copy:
+        src: "{{ coraza_spoa_built_bin }}"
+        dest: "{{ WAF_HC.path.file.bin }}"
+        remote_src: true
+        owner: 'root'
+        group: "{{ WAF_HC.user }}"
+        mode: 0750
+
+    - name: HAProxy WAF | Write source build marker
+      ansible.builtin.copy:
+        dest: "{{ coraza_spoa_marker_file }}"
+        content: "{{ coraza_spoa_version_resolved }}"
+        owner: 'root'
+        group: 'root'
+        mode: '0644'

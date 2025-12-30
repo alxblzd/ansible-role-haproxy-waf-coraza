@@ -23,6 +23,11 @@ Internal CI: [Tester Role](https://github.com/O-X-L/ansible-role-oxl-cicd) | [Jo
 **Tested:**
 * Debian 12
 
+**ARM64 note:**
+- Default `coraza_spoa_install_method: auto` keeps the existing amd64 binary install path and switches to a source build on `aarch64/arm64`.
+- Set `coraza_spoa_install_method: source` to force source builds on any architecture (uses distro Go packages, `coraza_spoa_repo`, and `coraza_spoa_version`; set `coraza_spoa_force_rebuild: true` to rebuild).
+- `coraza_spoa_install_method: binary` is amd64-only and will fail on ARM64 with a clear message.
+
 ----
 
 ## Install
